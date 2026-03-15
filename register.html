@@ -6,137 +6,53 @@
     <title>Omni Vertus | Devenir Partenaire</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #064e3b;
-            --accent: #d4af37;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at center, #065f46, #022c22);
-            color: white;
-            padding: 20px;
-        }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 35px;
-            border-radius: 30px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .logo-area h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-            background: linear-gradient(to right, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-area p {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--accent);
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-
+        :root { --primary: #064e3b; --accent: #d4af37; --glass: rgba(255, 255, 255, 0.05); }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #065f46, #022c22); color: white; padding: 20px; }
+        .card { background: var(--glass); backdrop-filter: blur(20px); padding: 35px; border-radius: 30px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .logo-area h1 { font-size: 24px; margin-bottom: 5px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-area p { font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); margin-bottom: 25px; font-weight: 700; }
         .input-group { text-align: left; margin-bottom: 15px; }
         label { font-size: 11px; color: var(--accent); font-weight: 700; margin-left: 5px; text-transform: uppercase; }
-
-        input {
-            width: 100%;
-            padding: 15px;
-            margin-top: 5px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.3);
-            color: white;
-            box-sizing: border-box;
-            outline: none;
-            font-size: 14px;
-        }
-
+        input { width: 100%; padding: 15px; margin-top: 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; outline: none; font-size: 14px; }
         input:focus { border-color: var(--accent); }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            margin-top: 20px;
-            border-radius: 12px;
-            border: none;
-            background: var(--accent);
-            color: #022c22;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-        }
-
+        button { width: 100%; padding: 16px; margin-top: 20px; border-radius: 12px; border: none; background: var(--accent); color: #022c22; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         button:hover { transform: scale(1.02); }
-
         .footer-links { margin-top: 20px; font-size: 12px; }
         .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; }
     </style>
 </head>
 <body>
-
     <div class="card">
         <div class="logo-area">
             <h1>OMNI VERTUS</h1>
             <p>Inscription Partenaire</p>
         </div>
-
         <div class="input-group">
             <label>Téléphone (RDC +243)</label>
             <input type="tel" id="phone" placeholder="0812345678">
         </div>
-
         <div class="input-group">
             <label>Mot de passe (6 chiffres)</label>
             <input type="password" id="password" placeholder="******" maxlength="6">
         </div>
-
-        <div class="input-group" id="refArea">
+        <div class="input-group">
             <label>Code de Parrainage</label>
             <input type="text" id="refCode" placeholder="Code du parrain">
         </div>
-
         <button onclick="handleRegister()">Créer mon compte</button>
-
-        <div class="footer-links">
-            <a href="index.html">Déjà partenaire ? Se connecter</a>
-        </div>
+        <div class="footer-links"><a href="index.html">Déjà partenaire ? Se connecter</a></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURATION MISE À JOUR
-        const firebaseConfig = {
-            databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com"
-        };
-
+        const firebaseConfig = { databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('ref')) {
-            document.getElementById('refCode').value = urlParams.get('ref');
-        }
+        if(urlParams.has('ref')) document.getElementById('refCode').value = urlParams.get('ref');
 
         window.handleRegister = async () => {
             let phone = document.getElementById('phone').value.trim();
@@ -144,41 +60,35 @@
             const refCode = document.getElementById('refCode').value.trim();
 
             if(phone.startsWith('0')) phone = "+243" + phone.substring(1);
-            if(!phone.startsWith('+243') || phone.length < 12) {
-                return alert("Veuillez entrer un numéro RDC valide (+243...)");
-            }
-
+            if(!phone.startsWith('+243') || phone.length < 12) return alert("Numéro RDC invalide.");
             if(pass.length < 6) return alert("Le mot de passe doit faire 6 chiffres.");
-            if(!refCode) return alert("Le code de parrainage est obligatoire.");
+            if(!refCode) return alert("Code parrainage obligatoire.");
 
             try {
                 const usersSnap = await get(ref(db, 'users'));
                 const allUsers = usersSnap.exists() ? Object.values(usersSnap.val()) : [];
                 const parrain = allUsers.find(u => u.mon_code === refCode);
-
                 if(!parrain) return alert("Code parrainage invalide.");
 
                 const checkUser = await get(ref(db, 'users/' + phone));
-                if(checkUser.exists()) return alert("Ce numéro est déjà inscrit.");
+                if(checkUser.exists()) return alert("Numéro déjà inscrit.");
 
                 const monNouveauCode = "OV-" + Math.floor(1000 + Math.random() * 9000);
                 
+                // INSCRIPTION AVEC BONUS 5000 SANS COMMISSION PARRAIN
                 await set(ref(db, 'users/' + phone), {
                     telephone: phone,
                     password: pass,
                     parraine_par: refCode,
                     mon_code: monNouveauCode,
+                    solde: 5000, 
                     total_commissions: 0,
-                    solde: 5000, // Bonus de bienvenue (optionnel)
                     date_inscription: new Date().toISOString()
                 });
 
-                alert("Compte Omni Vertus créé ! Code : " + monNouveauCode);
+                alert("Compte créé ! Bonus de 5.000 CDF offert.");
                 window.location.href = "index.html";
-
-            } catch (e) {
-                alert("Erreur lors de l'inscription.");
-            }
+            } catch (e) { alert("Erreur lors de l'inscription."); }
         };
     </script>
 </body>
