@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Vertus | Retrait Libre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #022c22; 
+            background-image: radial-gradient(circle at 0% 0%, #064e3b 0%, transparent 50%), radial-gradient(circle at 100% 100%, #10b981 0%, transparent 50%);
+            background-attachment: fixed;
+            color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .gold-card { background: linear-gradient(135deg, #d4af37 0%, #f1d37a 100%); color: #022c22; }
+        .input-glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: white; outline: none; transition: 0.3s; }
+        .input-glass:focus { border-color: #d4af37; background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="p-4 pb-28">
+
+    <div class="max-w-md mx-auto">
+        <div class="flex items-center gap-4 mb-6 pt-4">
+            <button onclick="window.history.back()" class="w-10 h-10 glass rounded-full flex items-center justify-center text-[#d4af37]">←</button>
+            <h1 class="text-lg font-black uppercase tracking-widest">Retrait</h1>
+        </div>
+
+        <div class="gold-card p-8 rounded-[2.5rem] mb-8 shadow-2xl relative overflow-hidden">
+            <p class="text-[10px] uppercase font-black tracking-[0.2em] opacity-70">Solde Disponible</p>
+            <div class="flex items-baseline gap-2 mt-2">
+                <span id="user-solde" class="text-5xl font-extrabold tracking-tighter">5 000</span>
+                <span class="text-sm font-bold uppercase">FC</span>
+            </div>
+            <div class="absolute top-0 right-0 p-6 opacity-10 text-6xl">OV</div>
+        </div>
+
+        <div class="glass p-6 rounded-[2.5rem] space-y-5 border border-white/10 shadow-2xl">
+            
+            <h2 class="text-[10px] font-black uppercase text-gold tracking-widest text-center mb-2">Informations de paiement</h2>
+
+            <div>
+                <label class="text-[9px] uppercase font-bold text-gray-400 ml-2 mb-1 block">Nom Complet (Carte SIM)</label>
+                <input type="text" id="bankName" placeholder="Ex: Jean Mukendi" class="w-full p-4 rounded-2xl input-glass text-sm font-bold">
+            </div>
+
+            <div>
+                <label class="text-[9px] uppercase font-bold text-gray-400 ml-2 mb-1 block">Numéro de Réception</label>
+                <input type="tel" id="bankNumber" placeholder="Ex: 0812345678" class="w-full p-4 rounded-2xl input-glass text-sm font-bold">
+            </div>
+
+            <hr class="border-white/5 my-2">
+
+            <div>
+                <label class="text-[9px] uppercase font-bold text-gold ml-2 mb-1 block tracking-widest">Montant à retirer</label>
+                <input type="number" id="withdrawAmount" placeholder="Minimum 5 000 FC" class="w-full p-5 rounded-2xl input-glass text-2xl font-black text-center">
+            </div>
+            
+            <p class="text-[10px] text-center text-white/40 italic">Heures de service : 09:00 — 17:00</p>
+
+            <button onclick="requestWithdrawal()" class="gold-card w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition">
+                Confirmer le retrait
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://omni-vertus-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // On récupère le numéro ou on utilise "Test_User" si vide
+        const myPhone = localStorage.getItem('userPhone') || "Invite_Test";
+
+        // Charger le solde (Si l'utilisateur existe dans la DB)
+        onValue(ref(db, 'users/' + myPhone), (snapshot) => {
+            if(snapshot.exists()) {
+                const user = snapshot.val();
+                document.getElementById('user-solde').innerText = (user.solde || 0).toLocaleString();
+                window.currentSolde = user.solde || 0;
+                if (user.bankName) document.getElementById('bankName').value = user.bankName;
+                if (user.bankNumber) document.getElementById('bankNumber').value = user.bankNumber;
+            } else {
+                // Valeurs par défaut pour tester sans compte
+                window.currentSolde = 5000; 
+            }
+        });
+
+        window.requestWithdrawal = async () => {
+            const name = document.getElementById('bankName').value;
+            const num = document.getElementById('bankNumber').value;
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+
+            // Vérifications minimales sans bloquer l'accès à la page
+            if (!name || !num) return alert("❌ Veuillez entrer vos informations.");
+            if (isNaN(amount) || amount < 5000) return alert("❌ Minimum 5 000 FC.");
+            if (amount > window.currentSolde) return alert("❌ Solde insuffisant.");
+
+            try {
+                // Envoi de la demande même sans compte profil complet
+                await push(ref(db, 'admin_requests/withdrawals'), {
+                    user: myPhone,
+                    montant: amount,
+                    nom: name,
+                    numero: num,
+                    date: new Date().toLocaleString(),
+                    status: "EN ATTENTE"
+                });
+
+                alert("✅ Demande envoyée !");
+                window.location.href = "dashboard.html";
+            } catch (e) { 
+                alert("Erreur lors de l'envoi."); 
+            }
+        };
+    </script>
+</body>
+</html>
