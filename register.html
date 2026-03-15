@@ -36,8 +36,8 @@
             <input type="password" id="password" placeholder="******" maxlength="6">
         </div>
         <div class="input-group">
-            <label>Code de Parrainage</label>
-            <input type="text" id="refCode" placeholder="Code du parrain">
+            <label>Code de Parrainage (Optionnel)</label>
+            <input type="text" id="refCode" placeholder="Laissez vide pour le premier compte">
         </div>
         <button onclick="handleRegister()">Créer mon compte</button>
         <div class="footer-links"><a href="index.html">Déjà partenaire ? Se connecter</a></div>
@@ -59,45 +59,46 @@
             const pass = document.getElementById('password').value;
             const refCode = document.getElementById('refCode').value.trim();
 
+            // Validation de base
             if(phone.startsWith('0')) phone = "+243" + phone.substring(1);
             if(!phone.startsWith('+243') || phone.length < 12) return alert("Numéro RDC invalide.");
             if(pass.length < 6) return alert("Le mot de passe doit faire 6 chiffres.");
-            if(!refCode) return alert("Code parrainage obligatoire. (Utilisez 'ADMIN' si premier utilisateur)");
 
             try {
-                const usersSnap = await get(ref(db, 'users'));
-                const allUsers = usersSnap.exists() ? Object.values(usersSnap.val()) : [];
-                
-                // --- LOGIQUE DE DÉBLOCAGE PREMIER UTILISATEUR ---
-                let parrainValide = false;
-                if(refCode === "ADMIN") {
-                    parrainValide = true;
-                } else {
-                    const parrain = allUsers.find(u => u.mon_code === refCode);
-                    if(parrain) parrainValide = true;
-                }
-
-                if(!parrainValide) return alert("Code parrainage invalide.");
-                // -----------------------------------------------
-
+                // Vérifier si le numéro existe déjà
                 const checkUser = await get(ref(db, 'users/' + phone));
                 if(checkUser.exists()) return alert("Numéro déjà inscrit.");
+
+                // Vérifier le parrain seulement s'il est saisi
+                let parrainFinal = "AUCUN";
+                if(refCode !== "") {
+                    const usersSnap = await get(ref(db, 'users'));
+                    if(usersSnap.exists()){
+                        const allUsers = Object.values(usersSnap.val());
+                        const parrain = allUsers.find(u => u.mon_code === refCode);
+                        if(!parrain) return alert("Code parrainage invalide. Laissez vide si vous n'en avez pas.");
+                        parrainFinal = refCode;
+                    }
+                }
 
                 const monNouveauCode = "OV-" + Math.floor(1000 + Math.random() * 9000);
                 
                 await set(ref(db, 'users/' + phone), {
                     telephone: phone,
                     password: pass,
-                    parraine_par: (refCode === "ADMIN" ? "SYSTEM" : refCode),
+                    parraine_par: parrainFinal,
                     mon_code: monNouveauCode,
                     solde: 5000, 
                     total_commissions: 0,
                     date_inscription: new Date().toISOString()
                 });
 
-                alert("Compte créé ! Votre code parrain : " + monNouveauCode);
+                alert("✅ Inscription réussie ! Votre code parrain : " + monNouveauCode);
                 window.location.href = "index.html";
-            } catch (e) { alert("Erreur lors de l'inscription."); }
+            } catch (e) { 
+                console.error(e);
+                alert("Erreur lors de l'inscription. Vérifiez votre connexion."); 
+            }
         };
     </script>
 </body>
