@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Vertus | Recharge VIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #022c22; 
+            background-image: radial-gradient(circle at 0% 0%, #064e3b 0%, transparent 50%), radial-gradient(circle at 100% 100%, #10b981 0%, transparent 50%);
+            background-attachment: fixed;
+            color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .gold-gradient { background: linear-gradient(135deg, #d4af37 0%, #f1d37a 100%); }
+        .amount-card, .operator-card { transition: all 0.2s; border: 2px solid transparent; cursor: pointer; }
+        .amount-card.active, .operator-card.active { border-color: #d4af37; background: rgba(212, 175, 55, 0.1); transform: scale(1.05); }
+        input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(212, 175, 55, 0.2) !important; color: white !important; }
+        input:focus { border-color: #d4af37 !important; outline: none; }
+    </style>
+</head>
+<body class="p-4 pb-28">
+
+    <div class="max-w-md mx-auto">
+        <div class="flex items-center gap-4 mb-6 pt-4">
+            <button onclick="window.history.back()" class="w-10 h-10 glass rounded-full flex items-center justify-center text-[#d4af37]">←</button>
+            <h1 class="text-lg font-black uppercase tracking-widest text-gold">Recharge Officielle</h1>
+        </div>
+
+        <label class="text-[9px] font-black uppercase text-gray-400 ml-2 mb-3 block text-center tracking-[0.2em]">Sélectionnez votre Pack VIP</label>
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <div onclick="selectAmount(this, 15000, 'VIP 1')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 1</p>
+                <p class="text-sm font-black">15 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 30000, 'VIP 2')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 2</p>
+                <p class="text-sm font-black">30 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 65000, 'VIP 3')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 3</p>
+                <p class="text-sm font-black">65 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 100000, 'VIP 4')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 4</p>
+                <p class="text-sm font-black">100 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 200000, 'VIP 5')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 5</p>
+                <p class="text-sm font-black">200 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 350000, 'VIP 6')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 6</p>
+                <p class="text-sm font-black">350 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 500000, 'VIP 7')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 7</p>
+                <p class="text-sm font-black">500 000 CDF</p>
+            </div>
+            <div onclick="selectAmount(this, 1000000, 'VIP 8')" class="amount-card glass py-4 rounded-xl text-center">
+                <p class="text-[9px] font-bold text-gold uppercase tracking-tighter">Pack VIP 8</p>
+                <p class="text-sm font-black">1 000 000 CDF</p>
+            </div>
+        </div>
+
+        <label class="text-[9px] font-black uppercase text-gray-400 ml-2 mb-3 block text-center tracking-[0.2em]">Sélectionnez l'Opérateur</label>
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div onclick="selectOperator(this, 'Orange', '0802267704')" class="operator-card glass p-3 rounded-xl text-center">
+                <div class="w-8 h-8 bg-orange-500 rounded-lg mx-auto mb-2"></div>
+                <p class="text-[8px] font-black uppercase">Orange</p>
+            </div>
+            <div onclick="selectOperator(this, 'M-Pesa', '0810293226')" class="operator-card glass p-3 rounded-xl text-center">
+                <div class="w-8 h-8 bg-red-600 rounded-lg mx-auto mb-2"></div>
+                <p class="text-[8px] font-black uppercase">Vodacom</p>
+            </div>
+            <div onclick="selectOperator(this, 'Airtel', '0992675441')" class="operator-card glass p-3 rounded-xl text-center">
+                <div class="w-8 h-8 bg-red-500 rounded-lg mx-auto mb-2"></div>
+                <p class="text-[8px] font-black uppercase">Airtel</p>
+            </div>
+        </div>
+
+        <div id="instructionBox" class="hidden glass p-4 rounded-2xl mb-6 border border-gold/30 animate-pulse text-center">
+            <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Envoyez l'argent au numéro suivant :</p>
+            <p id="destNumber" class="text-xl font-black text-gold tracking-widest"></p>
+            <p class="text-[9px] text-white/60 mt-2 italic">Copiez le numéro et effectuez le transfert.</p>
+        </div>
+
+        <div class="glass p-6 rounded-[2.5rem] space-y-4 shadow-2xl">
+            <div>
+                <label class="text-[9px] font-black uppercase text-gray-400 ml-2 mb-1 block tracking-widest">Votre numéro expéditeur</label>
+                <input type="tel" id="senderPhone" placeholder="08..." class="w-full p-4 rounded-2xl text-sm font-bold">
+            </div>
+            <div>
+                <label class="text-[9px] font-black uppercase text-gray-400 ml-2 mb-1 block tracking-widest">ID / Référence de transaction</label>
+                <input type="text" id="transactionID" placeholder="TID..." class="w-full p-4 rounded-2xl text-sm font-bold uppercase">
+            </div>
+
+            <button onclick="soumettreDepot()" class="gold-gradient w-full py-4 rounded-2xl text-emerald-950 font-black uppercase tracking-[0.2em] text-xs mt-4">
+                Confirmer le dépôt
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://omni-vertus-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let selectedPrice = 0;
+        let selectedVIP = "";
+        let selectedOp = "";
+
+        window.selectAmount = (el, amount, name) => {
+            document.querySelectorAll('.amount-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedPrice = amount;
+            selectedVIP = name;
+        };
+
+        window.selectOperator = (el, op, number) => {
+            document.querySelectorAll('.operator-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedOp = op;
+            
+            const box = document.getElementById('instructionBox');
+            const destText = document.getElementById('destNumber');
+            box.classList.remove('hidden');
+            destText.innerText = number;
+        };
+
+        window.soumettreDepot = async () => {
+            const phone = document.getElementById('senderPhone').value;
+            const tid = document.getElementById('transactionID').value;
+            const userPhone = localStorage.getItem('userPhone') || "Inconnu";
+
+            if(!selectedPrice || !selectedOp || !phone || !tid) {
+                alert("⚠️ Veuillez sélectionner un montant, un opérateur et remplir les champs.");
+                return;
+            }
+
+            try {
+                await push(ref(db, 'admin_requests/deposits'), {
+                    user: userPhone,
+                    vip: selectedVIP,
+                    montant: selectedPrice,
+                    operateur: selectedOp,
+                    numeroExpediteur: phone,
+                    transactionID: tid,
+                    date: new Date().toLocaleString(),
+                    status: "EN ATTENTE"
+                });
+
+                alert("✅ Votre demande pour " + selectedPrice.toLocaleString() + " CDF est envoyée ! Elle sera validée après vérification.");
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                alert("Erreur: " + e.message);
+            }
+        };
+    </script>
+</body>
+</html>
