@@ -7,108 +7,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #022c22; 
-            background-image: radial-gradient(circle at 0% 0%, #064e3b 0%, transparent 50%), radial-gradient(circle at 100% 100%, #065f46 0%, transparent 50%);
-            background-attachment: fixed;
-            color: #fff; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        body { background: #022c22; background-image: radial-gradient(circle at 0% 0%, #064e3b 0%, transparent 50%), radial-gradient(circle at 100% 100%, #065f46 0%, transparent 50%); background-attachment: fixed; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .text-gold { color: #d4af37; }
         .gold-gradient { background: linear-gradient(135deg, #d4af37 0%, #f1d37a 100%); }
-        
-        #telegramPopup { display: none; animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="p-4 pb-24">
-
-    <div id="telegramPopup" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6">
-        <div class="glass p-8 rounded-[2.5rem] w-full max-w-sm text-center border-gold/30 border-2">
-            <div class="text-5xl mb-4">📢</div>
-            <h3 class="text-xl font-black mb-2 text-white uppercase tracking-tight">Rejoignez l'Élite</h3>
-            <p class="text-gray-400 text-sm mb-6">Rejoignez notre canal officiel Telegram pour ne rater aucun bonus et les preuves de paiements.</p>
-            <a href="https://t.me/+0nNzJndHQzNhNTRk" target="_blank" class="gold-gradient block w-full py-4 rounded-2xl text-emerald-950 font-black uppercase tracking-widest text-sm mb-3">Ouvrir Telegram</a>
-            <button onclick="closePopup()" class="text-gray-500 text-xs font-bold uppercase tracking-widest">Plus tard</button>
-        </div>
-    </div>
-
     <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-8 pt-4">
-            <div>
-                <p class="text-[10px] text-gold uppercase font-bold tracking-widest">Espace Partenaire</p>
-                <h1 class="text-xl font-black italic">OMNI VERTUS</h1>
-            </div>
-            <div class="w-10 h-10 rounded-full border-2 border-gold flex items-center justify-center bg-white/10">
-                <span class="text-gold font-bold text-xs">OV</span>
-            </div>
+            <div><p class="text-[10px] text-[#d4af37] uppercase font-bold">Espace Partenaire</p><h1 class="text-xl font-black italic">OMNI VERTUS</h1></div>
+            <div class="w-10 h-10 rounded-full border-2 border-[#d4af37] flex items-center justify-center bg-white/10"><span class="text-[#d4af37] font-bold text-xs">OV</span></div>
         </div>
 
         <div class="gold-gradient p-8 rounded-[2.5rem] text-emerald-950 shadow-2xl shadow-gold/30 mb-8 relative overflow-hidden">
-            <div class="absolute -right-5 -top-5 bg-white/20 px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter">Cadeau de bienvenue</div>
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
-            
-            <p class="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1 text-emerald-900">Solde Disponible</p>
+            <p class="text-[10px] uppercase font-black opacity-70 mb-1">Solde Disponible</p>
             <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-black">5.000</span>
-                <span class="text-sm font-bold">FC</span>
+                <span class="text-4xl font-black" id="balance-display">...</span>
+                <span class="text-sm font-bold">CDF</span>
             </div>
-            
             <div class="mt-8 flex gap-3">
-                <button onclick="window.location.href='deposit.html'" class="bg-emerald-950 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">Dépôt</button>
-                <button onclick="window.location.href='withdraw.html'" class="bg-white/40 text-emerald-950 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/20">Retrait</button>
+                <button onclick="window.location.href='deposit.html'" class="bg-emerald-950 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg">Dépôt</button>
+                <button onclick="window.location.href='withdraw.html'" class="bg-white/40 text-emerald-950 px-6 py-3 rounded-2xl text-[10px] font-black uppercase border border-white/20">Retrait</button>
             </div>
         </div>
 
         <div class="grid grid-cols-4 gap-4 mb-10 text-center">
-            <div onclick="window.location.href='plans.html'" class="cursor-pointer group">
-                <div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl group-active:scale-95 transition mb-2 border-b-2 border-gold/20">📊</div>
-                <span class="text-[8px] font-bold uppercase text-gray-400 tracking-tighter">Plans</span>
-            </div>
-            <div onclick="window.location.href='team.html'" class="cursor-pointer group">
-                <div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl group-active:scale-95 transition mb-2">👥</div>
-                <span class="text-[8px] font-bold uppercase text-gray-400 tracking-tighter">Équipe</span>
-            </div>
-            <div onclick="window.location.href='bonus.html'" class="cursor-pointer group">
-                <div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl group-active:scale-95 transition mb-2">💰</div>
-                <span class="text-[8px] font-bold uppercase text-gray-400 tracking-tighter">Bonus</span>
-            </div>
-            <div onclick="window.location.href='support.html'" class="cursor-pointer group">
-                <div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl group-active:scale-95 transition mb-2">💬</div>
-                <span class="text-[8px] font-bold uppercase text-gray-400 tracking-tighter">Aide</span>
-            </div>
-        </div>
-
-        <div class="mb-4 flex justify-between items-center px-2">
-            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400">Mes Contrats</h2>
-            <div class="h-[1px] flex-grow mx-4 bg-white/10"></div>
+            <div onclick="window.location.href='plans.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2 border-b-2 border-gold/20">📊</div><span class="text-[8px] font-bold uppercase text-gray-400">Plans</span></div>
+            <div onclick="window.location.href='team.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2">👥</div><span class="text-[8px] font-bold uppercase text-gray-400">Équipe</span></div>
+            <div onclick="window.location.href='bonus.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2">💰</div><span class="text-[8px] font-bold uppercase text-gray-400">Bonus</span></div>
+            <div onclick="window.location.href='support.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2">💬</div><span class="text-[8px] font-bold uppercase text-gray-400">Aide</span></div>
         </div>
 
         <div class="text-center py-10 glass rounded-[2rem] border-dashed border-2 border-white/10">
-            <p class="text-gray-500 text-[10px] italic uppercase tracking-widest font-bold">Utilisez vos 5.000 FC pour activer un plan</p>
+            <p class="text-gray-500 text-[10px] italic uppercase font-bold">Prêt pour votre premier contrat ?</p>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass border border-white/10 p-4 flex justify-around items-center rounded-[2.5rem] shadow-2xl z-50">
-        <button class="text-gold text-xl">🏠</button>
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass border border-white/10 p-4 flex justify-around items-center rounded-[2.5rem] z-50">
+        <button class="text-[#d4af37] text-xl">🏠</button>
         <button onclick="window.location.href='plans.html'" class="text-gray-500 text-xl opacity-50">📈</button>
-        <div onclick="window.location.href='plans.html'" class="w-12 h-12 bg-gold rounded-full -mt-10 flex items-center justify-center shadow-lg border-4 border-[#022c22] text-2xl cursor-pointer">
-            <span class="text-emerald-950 font-bold">+</span>
-        </div>
         <button onclick="window.location.href='team.html'" class="text-gray-500 text-xl opacity-50">👥</button>
         <button onclick="window.location.href='profile.html'" class="text-gray-500 text-xl opacity-50">👤</button>
     </nav>
 
-    <script>
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('telegramPopup').style.display = 'flex';
-            }, 1000);
-        };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function closePopup() {
-            document.getElementById('telegramPopup').style.display = 'none';
+        const firebaseConfig = { databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const userPhone = localStorage.getItem('userPhone');
+
+        if (!userPhone) {
+            window.location.href = "index.html";
+        } else {
+            onValue(ref(db, 'users/' + userPhone), (snapshot) => {
+                if (snapshot.exists()) {
+                    document.getElementById('balance-display').innerText = (snapshot.val().solde || 0).toLocaleString();
+                }
+            });
         }
     </script>
 </body>
