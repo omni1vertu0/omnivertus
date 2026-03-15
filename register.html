@@ -125,14 +125,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIGURATION MISE À JOUR
         const firebaseConfig = {
-            databaseURL: "TON_LIEN_DATABASE_OMNI_VERTUS"
+            databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Récupérer automatiquement le code parrain dans l'URL si présent
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('ref')) {
             document.getElementById('refCode').value = urlParams.get('ref');
@@ -143,7 +143,6 @@
             const pass = document.getElementById('password').value;
             const refCode = document.getElementById('refCode').value.trim();
 
-            // Validation Numéro RDC
             if(phone.startsWith('0')) phone = "+243" + phone.substring(1);
             if(!phone.startsWith('+243') || phone.length < 12) {
                 return alert("Veuillez entrer un numéro RDC valide (+243...)");
@@ -153,18 +152,15 @@
             if(!refCode) return alert("Le code de parrainage est obligatoire.");
 
             try {
-                // 1. Vérifier si le parrain existe
                 const usersSnap = await get(ref(db, 'users'));
                 const allUsers = usersSnap.exists() ? Object.values(usersSnap.val()) : [];
                 const parrain = allUsers.find(u => u.mon_code === refCode);
 
                 if(!parrain) return alert("Code parrainage invalide.");
 
-                // 2. Vérifier si l'utilisateur existe déjà
                 const checkUser = await get(ref(db, 'users/' + phone));
                 if(checkUser.exists()) return alert("Ce numéro est déjà inscrit.");
 
-                // 3. Créer le compte
                 const monNouveauCode = "OV-" + Math.floor(1000 + Math.random() * 9000);
                 
                 await set(ref(db, 'users/' + phone), {
@@ -173,6 +169,7 @@
                     parraine_par: refCode,
                     mon_code: monNouveauCode,
                     total_commissions: 0,
+                    solde: 5000, // Bonus de bienvenue (optionnel)
                     date_inscription: new Date().toISOString()
                 });
 
