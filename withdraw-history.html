@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Vertus | Historique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #022c22; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .status-pending { color: #fbbf24; } /* Jaune */
+        .status-success { color: #10b981; } /* Vert */
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <div class="flex items-center gap-4 mb-8 pt-4">
+            <button onclick="window.history.back()" class="w-10 h-10 glass rounded-full flex items-center justify-center text-[#d4af37]">←</button>
+            <h1 class="text-lg font-black uppercase tracking-widest">Mes Retraits</h1>
+        </div>
+
+        <div id="history-list" class="space-y-4">
+            <p class="text-center opacity-30 text-xs mt-10">Chargement de l'historique...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://omni-vertus-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const myPhone = localStorage.getItem('userPhone');
+
+        const historyDiv = document.getElementById('history-list');
+
+        // On écoute les demandes de retrait filtrées par le numéro de l'utilisateur
+        onValue(ref(db, 'admin_requests/withdrawals'), (snapshot) => {
+            historyDiv.innerHTML = "";
+            let hasData = false;
+
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                if(data.user === myPhone) {
+                    hasData = true;
+                    const statusClass = data.status === "EN ATTENTE" ? "status-pending" : "status-success";
+                    
+                    historyDiv.innerHTML += `
+                        <div class="glass p-5 rounded-3xl border border-white/5">
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="text-sm font-black">${data.montant.toLocaleString()} FC</p>
+                                <p class="text-[9px] font-bold uppercase ${statusClass}">${data.status}</p>
+                            </div>
+                            <div class="flex justify-between items-center opacity-50">
+                                <p class="text-[8px] uppercase font-bold">${data.date}</p>
+                                <p class="text-[8px] font-bold">${data.numero}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if(!hasData) {
+                historyDiv.innerHTML = '<p class="text-center opacity-30 text-xs mt-10">Aucun retrait effectué.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
