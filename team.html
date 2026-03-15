@@ -66,17 +66,18 @@
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass border border-white/10 p-4 flex justify-around items-center rounded-[2.5rem] shadow-2xl z-50">
-        <button onclick="window.location.href='dashboard.html'" class="text-gray-500 text-xl opacity-50">🏠</button>
-        <button onclick="window.location.href='plans.html'" class="text-gray-500 text-xl opacity-50">📈</button>
-        <button class="text-gold text-xl">👥</button>
-        <button onclick="window.location.href='profile.html'" class="text-gray-500 text-xl opacity-50">👤</button>
-    </nav>
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass rounded-[2.5rem] p-4 flex justify-around items-center border border-white/10 shadow-2xl">
+        <button onclick="window.location.href='dashboard.html'" class="text-xl grayscale opacity-50">🏠</button>
+        <button onclick="window.location.href='plans.html'" class="text-xl grayscale opacity-50">📉</button>
+        <button class="text-2xl">👥</button>
+        <button onclick="window.location.href='profile.html'" class="text-xl grayscale opacity-50">👤</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIGURATION MISE À JOUR
         const firebaseConfig = { databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -84,23 +85,24 @@
         const myPhone = localStorage.getItem('userPhone');
         let myInviteCode = "";
 
-        // 1. Récupérer mes infos (mon code et mes commissions)
+        // Récupérer les infos de l'utilisateur actuel
         if (myPhone) {
             onValue(ref(db, 'users/' + myPhone), (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    myInviteCode = data.mon_code;
+                    myInviteCode = data.mon_code || "";
                     document.getElementById('total-comm').innerText = (data.total_commissions || 0).toLocaleString() + " CDF";
-                    document.getElementById('refLink').value = window.location.origin + "/register.html?ref=" + myInviteCode;
-                    loadLevel(1); // Charger le niveau 1 dès qu'on a le code
+                    // LIEN EXACT VERS TA PLATEFORME GITHUB
+                    document.getElementById('refLink').value = "https://omni1vertu0.github.io/omnivertus/register.html?ref=" + myInviteCode;
+                    loadLevel(1);
                 }
             });
         }
 
         window.copyRef = () => {
-            const link = document.getElementById('refLink');
-            link.select();
-            navigator.clipboard.writeText(link.value);
+            const linkField = document.getElementById('refLink');
+            linkField.select();
+            navigator.clipboard.writeText(linkField.value);
             alert("Lien de parrainage copié !");
         };
 
@@ -112,54 +114,50 @@
 
         async function loadLevel(level) {
             const listDiv = document.getElementById('member-list');
-            listDiv.innerHTML = '<p class="text-center text-xs mt-10 opacity-50 italic">Chargement...</p>';
+            listDiv.innerHTML = '<p class="text-center text-xs mt-10 opacity-50 italic">Analyse du réseau...</p>';
 
             const snapshot = await get(ref(db, 'users'));
             if (!snapshot.exists()) return;
 
             const allUsers = snapshot.val();
             listDiv.innerHTML = "";
-            let foundCount = 0;
+            let found = 0;
 
-            // Logique de filtrage par niveau
             Object.keys(allUsers).forEach(phone => {
                 const user = allUsers[phone];
                 let isMatch = false;
 
                 if (level === 1 && user.parraine_par === myInviteCode) {
                     isMatch = true;
-                } 
-                // Pour Niv 2 et 3, on remonte la chaîne
-                else if (level === 2) {
-                    const parrainNiv1 = Object.values(allUsers).find(u => u.mon_code === user.parraine_par);
-                    if (parrainNiv1 && parrainNiv1.parraine_par === myInviteCode) isMatch = true;
-                }
-                else if (level === 3) {
-                    const parrainNiv1 = Object.values(allUsers).find(u => u.mon_code === user.parraine_par);
-                    if (parrainNiv1) {
-                        const parrainNiv2 = Object.values(allUsers).find(u => u.mon_code === parrainNiv1.parraine_par);
-                        if (parrainNiv2 && parrainNiv2.parraine_par === myInviteCode) isMatch = true;
+                } else if (level === 2) {
+                    const parent = Object.values(allUsers).find(u => u.mon_code === user.parraine_par);
+                    if (parent && parent.parraine_par === myInviteCode) isMatch = true;
+                } else if (level === 3) {
+                    const parent = Object.values(allUsers).find(u => u.mon_code === user.parraine_par);
+                    if (parent) {
+                        const grandParent = Object.values(allUsers).find(u => u.mon_code === parent.parraine_par);
+                        if (grandParent && grandParent.parraine_par === myInviteCode) isMatch = true;
                     }
                 }
 
                 if (isMatch) {
-                    foundCount++;
+                    found++;
                     listDiv.innerHTML += `
                         <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
                             <div>
                                 <p class="text-xs font-black">${phone.substring(0, 6)}****</p>
-                                <p class="text-[8px] text-gray-500 uppercase">Membre Actif</p>
+                                <p class="text-[8px] text-gray-500 uppercase">Inscrit le ${user.date_inscription ? user.date_inscription.split('T')[0] : 'Récemment'}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-[10px] text-emerald-400 font-bold uppercase">Niveau ${level}</p>
+                                <p class="text-xs font-bold text-gold">${user.vip || 'Membre'}</p>
+                                <p class="text-[8px] text-emerald-400 font-bold uppercase">Niveau ${level}</p>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }
             });
 
-            if (foundCount === 0) {
-                listDiv.innerHTML = `<div class="text-center mt-20 opacity-20"><p class="text-4xl mb-2">👥</p><p class="text-[10px] uppercase font-bold tracking-widest">Aucun membre Niv. ${level}</p></div>`;
+            if (found === 0) {
+                listDiv.innerHTML = `<div class="text-center mt-20 opacity-20"><p class="text-4xl mb-2">👥</p><p class="text-[10px] uppercase font-bold tracking-widest">Aucun membre Niv.${level}</p></div>`;
             }
         }
     </script>
