@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Vertus | Connexion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #064e3b;
+            --accent: #d4af37;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #065f46, #022c22);
+            color: white;
+            overflow: hidden;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 40px;
+            width: 90%;
+            max-width: 380px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .logo-area h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin: 0;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-area p {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { font-size: 11px; color: var(--accent); font-weight: 700; margin-left: 5px; text-transform: uppercase; }
+
+        input {
+            width: 100%;
+            padding: 18px;
+            margin-top: 5px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); background: rgba(0,0,0,0.4); }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            margin-top: 20px;
+            border-radius: 15px;
+            border: none;
+            background: var(--accent);
+            color: #022c22;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+
+        .footer-links { margin-top: 25px; font-size: 13px; }
+        .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; }
+        .footer-links a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="logo-area">
+            <h1>OMNI VERTUS</h1>
+            <p>L'Excellence Partagée</p>
+        </div>
+
+        <div class="input-group">
+            <label>Téléphone (RDC)</label>
+            <input type="tel" id="phone" placeholder="08... ou +243...">
+        </div>
+
+        <div class="input-group">
+            <label>Mot de passe</label>
+            <input type="password" id="password" placeholder="******">
+        </div>
+
+        <button onclick="handleLogin()">Se connecter</button>
+
+        <div class="footer-links">
+            <a href="register.html">Pas encore partenaire ? S'inscrire</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // CONFIGURATION OMNI VERTUS (À REMPLACER PAR TES CLÉS RÉELLES)
+        const firebaseConfig = {
+            databaseURL: "https://omni-vertus-default-rtdb.firebaseio.com" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.handleLogin = async () => {
+            let phone = document.getElementById('phone').value.trim();
+            const pass = document.getElementById('password').value;
+
+            if(!phone || !pass) return alert("Veuillez remplir tous les champs.");
+
+            // Correction automatique du format RDC
+            if(phone.startsWith('0')) phone = "+243" + phone.substring(1);
+            if(!phone.startsWith('+243')) {
+                return alert("Format RDC invalide (+243...)");
+            }
+
+            try {
+                // Recherche de l'utilisateur dans la branche 'users'
+                const snapshot = await get(ref(db, 'users/' + phone));
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    if (userData.password === pass) {
+                        // On stocke les informations pour la session
+                        localStorage.setItem('userPhone', phone);
+                        localStorage.setItem('userCode', userData.mon_code); 
+                        
+                        // Redirection vers le tableau de bord
+                        window.location.href = "dashboard.html";
+                    } else {
+                        alert("Mot de passe incorrect.");
+                    }
+                } else {
+                    alert("Ce compte n'existe pas dans le réseau Omni Vertus.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erreur de connexion aux serveurs.");
+            }
+        };
+    </script>
+</body>
+</html>
