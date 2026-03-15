@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Vertus | Bonus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #022c22; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; background-image: radial-gradient(circle at top right, #064e3b, transparent); background-attachment: fixed; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .gold-card { background: linear-gradient(135deg, #d4af37 0%, #f1d37a 100%); color: #022c22; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <div class="flex items-center gap-4 mb-8 pt-4">
+            <button onclick="location.href='dashboard.html'" class="w-10 h-10 glass rounded-full flex items-center justify-center text-gold">←</button>
+            <h1 class="text-lg font-black uppercase tracking-widest">Centre de Bonus</h1>
+        </div>
+
+        <div class="glass p-8 rounded-[2.5rem] text-center border border-gold/20 mb-6 shadow-2xl">
+            <div class="text-5xl mb-4">🎁</div>
+            <h2 class="text-xl font-black mb-2">Code de Récompense</h2>
+            <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-6">Entrez votre code pour recevoir un bonus instantané</p>
+            
+            <input type="text" id="bonusCode" placeholder="EX: OMNI-2026" class="w-full p-5 rounded-2xl bg-black/20 border border-white/10 text-center font-bold tracking-widest mb-4 outline-none focus:border-gold transition">
+            
+            <button onclick="claimBonus()" class="gold-card w-full py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition">Utiliser le code</button>
+        </div>
+
+        <div class="glass p-6 rounded-3xl border border-white/5">
+            <p class="text-[9px] text-gold font-bold uppercase mb-2">Comment avoir des codes ?</p>
+            <p class="text-[11px] text-gray-400 leading-relaxed">Rejoignez notre canal officiel pour participer aux événements et gagner des codes bonus limités.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://omni-vertus-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const myPhone = localStorage.getItem('userPhone');
+
+        window.claimBonus = async () => {
+            const code = document.getElementById('bonusCode').value.trim().toUpperCase();
+            if(!code) return alert("Entrez un code !");
+
+            // Ici, tu peux définir des codes fixes ou les lire depuis Firebase
+            if(code === "WELCOME500") {
+                const userRef = ref(db, 'users/' + myPhone);
+                const snapshot = await get(userRef);
+                const currentSolde = snapshot.val().solde || 0;
+                
+                await update(userRef, { solde: currentSolde + 500 });
+                alert("✅ Félicitations ! +500 FC ajoutés à votre solde.");
+                location.href = 'dashboard.html';
+            } else {
+                alert("❌ Code invalide ou déjà utilisé.");
+            }
+        };
+    </script>
+</body>
+</html>
