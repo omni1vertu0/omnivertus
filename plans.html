@@ -44,7 +44,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, update, increment, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com" };
         const app = initializeApp(firebaseConfig);
@@ -55,14 +55,14 @@
         let userData = null;
 
         const plans = [
-            { id: 1, img: "🛰️", name: "VIP1 Instrument Alpha", prix: 15000, jour: 3000, total: 270000 },
-            { id: 2, img: "🔋", name: "VIP2 Instrument Beta", prix: 30000, jour: 6300, total: 567000 },
-            { id: 3, img: "🛡️", name: "VIP3 Instrument Gamma", prix: 65000, jour: 14300, total: 1287000 },
-            { id: 4, img: "💻", name: "VIP4 Instrument Delta", prix: 100000, jour: 23000, total: 2070000 },
-            { id: 5, img: "📡", name: "VIP5 Instrument Epsilon", prix: 200000, jour: 48000, total: 4320000 },
-            { id: 6, img: "💎", name: "VIP6 Instrument Zeta", prix: 350000, jour: 87500, total: 7875000 },
-            { id: 7, img: "🚀", name: "VIP7 Instrument Omega", prix: 500000, jour: 130000, total: 11700000 },
-            { id: 8, img: "🏛️", name: "VIP8 Instrument Royal", prix: 1000000, jour: 300000, total: 27000000 }
+            { id: 1, img: "🛰️", name: "VIP 1", prix: 15000, jour: 3000, total: 270000 },
+            { id: 2, img: "🔋", name: "VIP 2", prix: 30000, jour: 6300, total: 567000 },
+            { id: 3, img: "🛡️", name: "VIP 3", prix: 65000, jour: 14300, total: 1287000 },
+            { id: 4, img: "💻", name: "VIP 4", prix: 100000, jour: 23000, total: 2070000 },
+            { id: 5, img: "📡", name: "VIP 5", prix: 200000, jour: 48000, total: 4320000 },
+            { id: 6, img: "💎", name: "VIP 6", prix: 350000, jour: 87500, total: 7875000 },
+            { id: 7, img: "🚀", name: "VIP 7", prix: 500000, jour: 130000, total: 11700000 },
+            { id: 8, img: "🏛️", name: "VIP 8", prix: 1000000, jour: 300000, total: 27000000 }
         ];
 
         async function loadUserData() {
@@ -101,18 +101,34 @@
             if (!confirm("Confirmer l'activation de " + nom + " ?")) return;
 
             try {
-                // 1. Déduire du solde de l'acheteur
-                await update(ref(db, 'users/' + userPhone), { solde: currentBalance - prix });
+                const now = Date.now();
+                
+                // 1. Mise à jour de l'utilisateur (Solde, Nom du VIP et Date pour les revenus)
+                await update(ref(db, 'users/' + userPhone), { 
+                    solde: currentBalance - prix,
+                    vip: nom,
+                    last_payout: now,
+                    date_achat_timestamp: now,
+                    has_recharged: true 
+                });
 
-                // 2. Logique Commissions sur 3 Niveaux
+                // 2. Historique de l'achat
+                await push(ref(db, `users/${userPhone}/history`), {
+                    type: "ACHAT",
+                    details: "Activation " + nom,
+                    montant: -prix,
+                    date: new Date().toLocaleString()
+                });
+
+                // 3. Logique Commissions sur 3 Niveaux
                 const usersSnap = await get(ref(db, 'users'));
                 const allUsers = usersSnap.val();
 
                 let currentParrainCode = userData.parraine_par;
-                const taux = [0.25, 0.03, 0.01]; // 25%, 3%, 1%
+                const taux = [0.25, 0.03, 0.01];
 
                 for (let i = 0; i < 3; i++) {
-                    if (!currentParrainCode) break;
+                    if (!currentParrainCode || currentParrainCode === "SYSTEM") break;
 
                     const parrainPhone = Object.keys(allUsers).find(key => allUsers[key].mon_code === currentParrainCode);
                     
@@ -122,15 +138,22 @@
                             solde: increment(commission),
                             total_commissions: increment(commission)
                         });
-                        // On passe au parrain du dessus pour le niveau suivant
+
+                        await push(ref(db, `users/${parrainPhone}/history`), {
+                            type: "COMMISSION",
+                            details: "Filleul (Niv."+(i+1)+") achat " + nom,
+                            montant: commission,
+                            date: new Date().toLocaleString()
+                        });
+
                         currentParrainCode = allUsers[parrainPhone].parraine_par;
                     } else {
                         break;
                     }
                 }
 
-                alert("✅ Activation réussie !");
-                location.reload();
+                alert("✅ " + nom + " activé avec succès ! Vos revenus seront crédités toutes les 24h.");
+                location.href = "dashboard.html";
             } catch (e) {
                 alert("Erreur système.");
             }
