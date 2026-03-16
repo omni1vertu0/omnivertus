@@ -31,6 +31,23 @@
             </div>
         </div>
 
+        <div id="contract-section" class="glass p-5 rounded-[2rem] border border-white/10 mb-8 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-[9px] font-black uppercase tracking-widest text-[#d4af37]">Contrat Actif</p>
+                <span id="vip-status" class="bg-[#d4af37] text-emerald-900 text-[9px] font-black px-3 py-1 rounded-full uppercase">---</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/5 p-3 rounded-2xl">
+                    <p class="text-[8px] text-gray-400 uppercase font-bold">Gain Journalier</p>
+                    <p class="text-xs font-black" id="daily-gain">0 CDF</p>
+                </div>
+                <div class="bg-white/5 p-3 rounded-2xl">
+                    <p class="text-[8px] text-gray-400 uppercase font-bold">Prochain gain dans</p>
+                    <p class="text-xs font-black" id="timer">Calcul...</p>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-4 gap-4 mb-10 text-center">
             <div onclick="window.location.href='plans.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2 border-b-2 border-gold/20">📊</div><span class="text-[8px] font-bold uppercase text-gray-400">Plans</span></div>
             <div onclick="window.location.href='team.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2">👥</div><span class="text-[8px] font-bold uppercase text-gray-400">Équipe</span></div>
@@ -38,7 +55,7 @@
             <div onclick="window.location.href='support.html'" class="cursor-pointer group"><div class="w-full aspect-square glass rounded-[1.5rem] flex items-center justify-center text-2xl mb-2">💬</div><span class="text-[8px] font-bold uppercase text-gray-400">Aide</span></div>
         </div>
 
-        <div class="text-center py-10 glass rounded-[2rem] border-dashed border-2 border-white/10">
+        <div id="default-msg" class="text-center py-10 glass rounded-[2rem] border-dashed border-2 border-white/10">
             <p class="text-gray-500 text-[10px] italic uppercase font-bold">Prêt pour votre premier contrat ?</p>
         </div>
     </div>
@@ -52,19 +69,61 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, increment, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://omni-f2a9c-default-rtdb.firebaseio.com" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const userPhone = localStorage.getItem('userPhone');
 
+        const incomeTable = {
+            "VIP 1": 3000, "VIP 2": 6300, "VIP 3": 14300, "VIP 4": 23000,
+            "VIP 5": 48000, "VIP 6": 87500, "VIP 7": 130000, "VIP 8": 300000
+        };
+
         if (!userPhone) {
             window.location.href = "index.html";
         } else {
-            onValue(ref(db, 'users/' + userPhone), (snapshot) => {
+            onValue(ref(db, 'users/' + userPhone), async (snapshot) => {
                 if (snapshot.exists()) {
-                    document.getElementById('balance-display').innerText = (snapshot.val().solde || 0).toLocaleString();
+                    const userData = snapshot.val();
+                    document.getElementById('balance-display').innerText = (userData.solde || 0).toLocaleString();
+
+                    if (userData.vip && userData.vip !== "AUCUN") {
+                        document.getElementById('contract-section').classList.remove('hidden');
+                        document.getElementById('default-msg').classList.add('hidden');
+                        document.getElementById('vip-status').innerText = userData.vip;
+                        
+                        const dailyGain = incomeTable[userData.vip] || 0;
+                        document.getElementById('daily-gain').innerText = dailyGain.toLocaleString() + " CDF";
+
+                        // Logique de distribution 24h
+                        const now = Date.now();
+                        const lastPayout = userData.last_payout || userData.date_achat_timestamp || now;
+                        const oneDay = 24 * 60 * 60 * 1000;
+
+                        if (now - lastPayout >= oneDay) {
+                            const daysPassed = Math.floor((now - lastPayout) / oneDay);
+                            const totalEarned = dailyGain * daysPassed;
+
+                            await update(ref(db, 'users/' + userPhone), {
+                                solde: increment(totalEarned),
+                                last_payout: now
+                            });
+
+                            await push(ref(db, `users/${userPhone}/history`), {
+                                type: "REVENU",
+                                details: userData.vip,
+                                montant: totalEarned,
+                                date: new Date().toLocaleString()
+                            });
+                        } else {
+                            const timeLeft = oneDay - (now - lastPayout);
+                            const h = Math.floor(timeLeft / (3600000));
+                            const m = Math.floor((timeLeft % 3600000) / 60000);
+                            document.getElementById('timer').innerText = `${h}h ${m}m`;
+                        }
+                    }
                 }
             });
         }
